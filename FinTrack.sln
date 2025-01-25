@@ -9,10 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinTrack.Application", "Fin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinTrack.Domain", "FinTrack.Domain\FinTrack.Domain.csproj", "{556F834A-E2FE-44F9-94F2-3C40AE67A1D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinTrack.Tests", "FinTrack.Tests\FinTrack.Tests.csproj", "{EE27D7C4-81BC-47E5-B070-B310BEEC066B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinTrack.BackgroundTasks", "FinTrack.BackgroundTasks\FinTrack.BackgroundTasks.csproj", "{0F00931B-B97A-442F-94C9-03E334DCD75C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinTrack.Data", "FinTrack.Data\FinTrack.Data.csproj", "{D6D9E6FE-CA8E-4567-B4AE-A541546B65A1}"
 EndProject
 Global
@@ -33,14 +29,6 @@ Global
 		{556F834A-E2FE-44F9-94F2-3C40AE67A1D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{556F834A-E2FE-44F9-94F2-3C40AE67A1D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{556F834A-E2FE-44F9-94F2-3C40AE67A1D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE27D7C4-81BC-47E5-B070-B310BEEC066B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE27D7C4-81BC-47E5-B070-B310BEEC066B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE27D7C4-81BC-47E5-B070-B310BEEC066B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE27D7C4-81BC-47E5-B070-B310BEEC066B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0F00931B-B97A-442F-94C9-03E334DCD75C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0F00931B-B97A-442F-94C9-03E334DCD75C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0F00931B-B97A-442F-94C9-03E334DCD75C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0F00931B-B97A-442F-94C9-03E334DCD75C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D6D9E6FE-CA8E-4567-B4AE-A541546B65A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D6D9E6FE-CA8E-4567-B4AE-A541546B65A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6D9E6FE-CA8E-4567-B4AE-A541546B65A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
