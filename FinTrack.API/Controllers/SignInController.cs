@@ -38,7 +38,8 @@ public class SignInController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
+        //it has info from jwt into middlewares
         await _signInManager.SignOutAsync();
-        return Ok("Logged out successfully.");
+        return Ok();
     }
 }
