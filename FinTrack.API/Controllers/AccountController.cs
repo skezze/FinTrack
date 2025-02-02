@@ -1,18 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/account")]
+//[Authorize]
 public class AccountController : ControllerBase
 {
     private readonly OpenBankingService _openBankingService;
     public AccountController(OpenBankingService openBankingService)
     {
         _openBankingService = openBankingService;
-    }
-    [HttpGet("accounts")]
-    public IActionResult GetAccounts()
+    }  
+    [HttpGet("accounts/{userId}")]
+    public async Task<IActionResult> GetAccounts(string userId)
     {
-        _openBankingService.GetBankAccounts();
+        await _openBankingService.GetBankAccountsAsync(userId);
         return Ok("Accounts fetched");
     }
 }
