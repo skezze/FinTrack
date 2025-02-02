@@ -24,7 +24,7 @@ public class UserController : ControllerBase
     }
 
         [HttpPost]
-    public async Task<IActionResult> AddUser(RegisterModel registerModel)
+    public async Task<IActionResult> AddUser([FromBody]RegisterModel registerModel)
     {
         var result = await userManager.CreateAsync(new IdentityUser(registerModel.Username), registerModel.Password);
         if (result.Succeeded)
@@ -46,9 +46,9 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateUser(LoginModel currentModel, LoginModel newModel)
+    public async Task<IActionResult> UpdateUser([FromBody]UpdateUserModel model)
     {
-        var user = await userManager.FindByNameAsync(currentModel.Username);
+        var user = await userManager.FindByNameAsync(model.CurrentUsername);
         if (user == null)
         {
             return NotFound();
@@ -57,13 +57,13 @@ public class UserController : ControllerBase
         using var transaction = await dbContext.Database.BeginTransactionAsync();
         try
         {
-            var setUserNameResult = await userManager.SetUserNameAsync(user, newModel.Username);
+            var setUserNameResult = await userManager.SetUserNameAsync(user, model.NewUsername);
             if (!setUserNameResult.Succeeded)
             {
                 return BadRequest(setUserNameResult.Errors);
             }
 
-            var setPasswordResult = await userManager.ChangePasswordAsync(user, currentModel.Password, newModel.Password);
+            var setPasswordResult = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (!setPasswordResult.Succeeded)
             {
                 return BadRequest(setPasswordResult.Errors);
