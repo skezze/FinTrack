@@ -1,3 +1,6 @@
+using FinTrack.API;
+using FinTrack.API.Services;
+using FinTrack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,9 +62,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddScoped<OpenBankingService>();
-builder.Services.AddScoped<PdfGenerationService>();
-builder.Services.AddScoped<UserSettingsService>();
+builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+builder.Services.AddHttpClient<IMonobankService, MonobankService>();
 
 var app = builder.Build();
 
@@ -77,4 +79,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

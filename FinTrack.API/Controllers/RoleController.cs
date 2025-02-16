@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-//[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class RoleController : ControllerBase
 {
     private readonly RoleManager<IdentityRole> roleManager;

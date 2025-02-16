@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FinTrack.API;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-//[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin")]
 public class UserController : ControllerBase 
 {
     private readonly UserManager<IdentityUser> userManager;

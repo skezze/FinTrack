@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FinTrack.API;
+using Microsoft.EntityFrameworkCore;
 
-public class UserSettingsService
+public class UserSettingsService : IUserSettingsService
 {
     private readonly ApplicationDbContext _dbContext;
 
