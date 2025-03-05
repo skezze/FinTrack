@@ -6,5 +6,6 @@ namespace FinTrack.API.Services.Interfaces
     {
         Task<MonobankClientInfo?> GetClientInfoAsync();
         Task<List<MonobankTransaction>?> GetStatementAsync(long from, long to, string accountId);
+        Task AddTransactionIfNeeded(List<MonobankTransaction> transactions, string accountId);
     }
 }

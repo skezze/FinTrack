@@ -1,5 +1,7 @@
 ﻿using FinTrack.API.Entities;
 using FinTrack.API.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -9,11 +11,18 @@ namespace FinTrack.API.Services
     {
         private string ApiKey { get; set; }
         private readonly HttpClient _httpClient;
+        private readonly ApplicationDbContext dbContext;
+
         private string BaseUrl { get; set; }
 
-        public MonobankService(HttpClient httpClient, IConfiguration configuration)
+        public MonobankService(
+            HttpClient httpClient, 
+            IConfiguration configuration,
+            ApplicationDbContext dbContext
+            )
         {
             _httpClient = httpClient;
+            this.dbContext = dbContext;
             ApiKey = configuration["MonoBank:X-Token"]!;
             BaseUrl = configuration["MonoBank:BaseUrl"]!;
         }
@@ -31,7 +40,14 @@ namespace FinTrack.API.Services
         /// </summary>
         public async Task<List<MonobankTransaction>?> GetStatementAsync(long from, long to, string accountId = "0")//"0" is default account
         {
-            return await SendRequestAsync<List<MonobankTransaction>>($"{BaseUrl}/statement/{accountId}/{from}/{to}");
+            var transactions = await SendRequestAsync<List<MonobankTransaction>>($"{BaseUrl}/statement/{accountId}/{from}/{to}");
+
+            if (transactions is not null)
+            {
+                await AddTransactionIfNeeded(transactions!, accountId);
+            }
+            
+            return transactions;
         }
 
         /// <summary>
@@ -55,6 +71,27 @@ namespace FinTrack.API.Services
                 Console.WriteLine($"Ошибка запроса: {ex.Message}");
                 return default;
             }
+        }
+
+        public async Task AddTransactionIfNeeded(List<MonobankTransaction> transactions, string accountId)
+        {
+            var transactionIds = await dbContext
+                .MonobankTransactions
+                .Select(i => i.Id)
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach(var transaction in transactions)
+            {
+                if(!transactionIds.Contains(transaction.Id))
+                {
+                    transaction.AccountId = accountId;
+                    await dbContext.MonobankTransactions.AddAsync(transaction);
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+
         }
     }
 

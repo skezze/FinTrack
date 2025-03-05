@@ -3,6 +3,7 @@ using System;
 using FinTrack.API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinTrack.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305233746_add_accountId_to_monobankTransaction_entity")]
+    partial class add_accountId_to_monobankTransaction_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,6 +30,7 @@ namespace FinTrack.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AccountId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("Amount")
@@ -40,18 +43,22 @@ namespace FinTrack.API.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("CommissionRate")
                         .HasColumnType("bigint");
 
                     b.Property<string>("CounterEdrpou")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CounterIban")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CounterName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("CurrencyCode")
@@ -65,6 +72,7 @@ namespace FinTrack.API.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("InvoiceId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Mcc")
@@ -77,6 +85,7 @@ namespace FinTrack.API.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("ReceiptId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("Time")
@@ -214,15 +223,15 @@ namespace FinTrack.API.Migrations
                         {
                             Id = "22222222-2222-2222-2222-222222222222",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "597097dd-391c-4c0c-8747-a7cde86cac7f",
+                            ConcurrencyStamp = "9223f004-3afc-4dd2-994e-76e8791d2736",
                             Email = "admin@example.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEAPOjrLVFsEE1UC+xSf4Na9jhnXZ4LGbafj7lrqK+U6/4qlDXEeo2l+xvL3F5G1enQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGfJ8x3gt35VBb8gUhIofKm3Cwb8UhBAzkd7FrhYoZbP4FwClDl0WJ39GLGjLmU+0Q==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "bb34c9dc-098a-450a-8405-0680b6193b92",
+                            SecurityStamp = "d9be0362-51a5-410b-afa9-d72d87e76b4c",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });

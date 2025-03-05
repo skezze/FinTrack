@@ -14,11 +14,12 @@
         public Int64 CommissionRate { get; set; }
         public Int64 CashbackAmount { get; set; }
         public Int64 Balance { get; set; }
-        public string Comment { get; set; }
-        public string ReceiptId { get; set; }
-        public string InvoiceId { get; set; }
-        public string CounterEdrpou { get; set; }
-        public string CounterIban { get; set; }
-        public string CounterName { get; set; }
+        public string? Comment { get; set; }
+        public string? ReceiptId { get; set; }
+        public string? InvoiceId { get; set; }
+        public string? CounterEdrpou { get; set; }
+        public string? CounterIban { get; set; }
+        public string? CounterName { get; set; }
+        public string? AccountId { get; set; }
     }
 }
