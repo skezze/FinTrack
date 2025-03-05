@@ -14,8 +14,8 @@ namespace FinTrack.API.Services
         public MonobankService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            ApiKey = configuration["X-Token"]!;
-            BaseUrl = configuration["BaseUrl"]!;
+            ApiKey = configuration["MonoBank:X-Token"]!;
+            BaseUrl = configuration["MonoBank:BaseUrl"]!;
         }
 
         /// <summary>
@@ -27,9 +27,9 @@ namespace FinTrack.API.Services
         }
 
         /// <summary>
-        /// Получение выписки по счету за промежуток времени
+        /// Получение выписки по счету за промежуток времени не больше 30 дней и 500 транзакций
         /// </summary>
-        public async Task<List<MonobankTransaction>?> GetStatementAsync(string accountId, long from, long to)
+        public async Task<List<MonobankTransaction>?> GetStatementAsync(long from, long to, string accountId = "0")//"0" is default account
         {
             return await SendRequestAsync<List<MonobankTransaction>>($"{BaseUrl}/statement/{accountId}/{from}/{to}");
         }
