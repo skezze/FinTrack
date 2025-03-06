@@ -64,6 +64,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddHttpClient<IMonobankService, MonobankService>();
+builder.Services.AddScoped<IPdfReportGeneratorService, PdfReportGeneratorService>();
 
 var app = builder.Build();
 
