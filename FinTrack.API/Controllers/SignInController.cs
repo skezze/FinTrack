@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]/[action]")]
@@ -34,14 +33,5 @@ public class SignInController : ControllerBase
 
         var token = JwtHelper.GenerateJwtToken(user, _configuration);
         return Ok(token);
-    }
-
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Logout()
-    {
-        //it has info from jwt into middlewares
-        await _signInManager.SignOutAsync();
-        return Ok();
     }
 }
