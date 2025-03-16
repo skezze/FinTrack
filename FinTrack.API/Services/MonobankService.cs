@@ -1,8 +1,6 @@
 ﻿using FinTrack.API.Entities;
 using FinTrack.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace FinTrack.API.Services
@@ -16,7 +14,7 @@ namespace FinTrack.API.Services
         private string BaseUrl { get; set; }
 
         public MonobankService(
-            HttpClient httpClient, 
+            HttpClient httpClient,
             IConfiguration configuration,
             ApplicationDbContext dbContext
             )
