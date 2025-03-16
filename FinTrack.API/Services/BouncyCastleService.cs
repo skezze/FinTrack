@@ -4,6 +4,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Signers;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace FinTrack.API.Services.Interfaces
 {
@@ -80,6 +81,39 @@ namespace FinTrack.API.Services.Interfaces
             {
                 var pemReader = new PemReader(reader);
                 return ((AsymmetricCipherKeyPair)pemReader.ReadObject()).Private;
+            }
+        }
+
+        public static bool VerifySignature(string filePath)
+        {
+            AsymmetricKeyParameter publicKey = LoadPublicKey("public.pem");
+
+            byte[] data = File.ReadAllBytes(filePath);
+
+            byte[] signature = File.ReadAllBytes("signature.sig");
+
+            return VerifySignature(data, signature, publicKey);
+        }
+
+        public static bool VerifySignature(byte[] data, byte[] signature, AsymmetricKeyParameter publicKey)
+        {
+            var digest = new Sha256Digest();
+            digest.BlockUpdate(data, 0, data.Length);
+            byte[] hashedData = new byte[digest.GetDigestSize()];
+            digest.DoFinal(hashedData, 0);
+
+            var verifier = new RsaDigestSigner(new Sha256Digest());
+            verifier.Init(false, publicKey);
+            verifier.BlockUpdate(hashedData, 0, hashedData.Length);
+            return verifier.VerifySignature(signature);
+        }
+
+        public static AsymmetricKeyParameter LoadPublicKey(string path)
+        {
+            using (TextReader reader = new StreamReader(path))
+            {
+                var pemReader = new PemReader(reader);
+                return (RsaKeyParameters)pemReader.ReadObject();
             }
         }
     }
