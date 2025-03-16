@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using System.Security.Claims;
+using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +85,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = builder.Configuration["Google:ClientId"]!;
     options.ClientSecret = builder.Configuration["Google:ClientSecret"]!;
+    options.SaveTokens = true;
 });
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();

@@ -1,5 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using FinTrack.API;
+using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
@@ -33,5 +39,46 @@ public class SignInController : ControllerBase
 
         var token = JwtHelper.GenerateJwtToken(user, _configuration);
         return Ok(token);
+    }
+
+    [HttpGet]
+    public async Task GoogleLogin()
+    {
+        await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
+        {
+            RedirectUri = Url.Action("GoogleCallback", "SignIn")
+        });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GoogleCallback()
+    {
+        var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        if (!result.Succeeded)
+        {
+            return Unauthorized();
+        }
+
+        var claims = result.Principal.Claims.ToList();
+        var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+        var db = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+        {
+            user = new IdentityUser
+            {
+                Email = email,
+                UserName = name
+            };
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+        }
+
+        var jwt = JwtHelper.GenerateJwtToken(user, _configuration);
+
+        return Ok(new { token = jwt });
     }
 }
