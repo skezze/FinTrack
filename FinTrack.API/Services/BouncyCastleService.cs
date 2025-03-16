@@ -33,14 +33,14 @@ namespace FinTrack.API.Services.Interfaces
             SaveKeyToFile($"{pemDirectory}\\public.pem", publicKey);
         }
 
-        public static AsymmetricCipherKeyPair GenerateKeyPair()
+        public AsymmetricCipherKeyPair GenerateKeyPair()
         {
             var rsaKeyPairGenerator = new RsaKeyPairGenerator();
             rsaKeyPairGenerator.Init(new KeyGenerationParameters(new SecureRandom(), 2048));
             return rsaKeyPairGenerator.GenerateKeyPair();
         }
 
-        public static void SaveKeyToFile(string filePath, AsymmetricKeyParameter key)
+        public void SaveKeyToFile(string filePath, AsymmetricKeyParameter key)
         {
             using (TextWriter writer = new StreamWriter(filePath))
             {
@@ -51,18 +51,17 @@ namespace FinTrack.API.Services.Interfaces
 
         public string SignDocument(string filePath)
         {
-            AsymmetricKeyParameter privateKey = LoadPrivateKey("private.pem");
+            AsymmetricKeyParameter privateKey = LoadPrivateKey($"{pemDirectory}\\private.pem");
 
             byte[] data = File.ReadAllBytes(filePath);
 
             byte[] signature = SignData(data, privateKey);
-
-            File.WriteAllBytes("signature.sig", signature);
-            var fileName = Path.GetFileName(filePath);
-            return $"{pemDirectory}\\{fileName}-signature-{new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()}.sig";
+            var signaturePath = $"{pemDirectory}\\signature-{new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds()}.sig";
+            File.WriteAllBytes(signaturePath, signature);
+            return signaturePath;
         }
 
-        public static byte[] SignData(byte[] data, AsymmetricKeyParameter privateKey)
+        public byte[] SignData(byte[] data, AsymmetricKeyParameter privateKey)
         {
             var digest = new Sha256Digest();
             digest.BlockUpdate(data, 0, data.Length);
@@ -75,7 +74,7 @@ namespace FinTrack.API.Services.Interfaces
             return signer.GenerateSignature();
         }
 
-        public static AsymmetricKeyParameter LoadPrivateKey(string path)
+        public AsymmetricKeyParameter LoadPrivateKey(string path)
         {
             using (TextReader reader = new StreamReader(path))
             {
@@ -84,18 +83,18 @@ namespace FinTrack.API.Services.Interfaces
             }
         }
 
-        public static bool VerifySignature(string filePath)
+        public bool VerifySignature(string filePath, string signaturePath)
         {
-            AsymmetricKeyParameter publicKey = LoadPublicKey("public.pem");
+            AsymmetricKeyParameter publicKey = LoadPublicKey($"{pemDirectory}\\public.pem");
 
             byte[] data = File.ReadAllBytes(filePath);
 
-            byte[] signature = File.ReadAllBytes("signature.sig");
+            byte[] signature = File.ReadAllBytes(signaturePath);
 
             return VerifySignature(data, signature, publicKey);
         }
 
-        public static bool VerifySignature(byte[] data, byte[] signature, AsymmetricKeyParameter publicKey)
+        public bool VerifySignature(byte[] data, byte[] signature, AsymmetricKeyParameter publicKey)
         {
             var digest = new Sha256Digest();
             digest.BlockUpdate(data, 0, data.Length);
@@ -108,7 +107,7 @@ namespace FinTrack.API.Services.Interfaces
             return verifier.VerifySignature(signature);
         }
 
-        public static AsymmetricKeyParameter LoadPublicKey(string path)
+        public AsymmetricKeyParameter LoadPublicKey(string path)
         {
             using (TextReader reader = new StreamReader(path))
             {
