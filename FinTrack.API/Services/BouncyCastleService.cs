@@ -10,16 +10,12 @@ namespace FinTrack.API.Services.Interfaces
 {
     public class BouncyCastleService : IBouncyCastleService
     {
-        private readonly ApplicationDbContext dbContext;
-
         private readonly string pemDirectory;
 
         public BouncyCastleService(
-            IConfiguration configuration,
-            ApplicationDbContext dbContext
+            IConfiguration configuration
             )
         {
-            this.dbContext = dbContext;
             this.pemDirectory = configuration["BouncyCastle:PemDirectory"]!;
         }
 
