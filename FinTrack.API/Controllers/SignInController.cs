@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using FinTrack.API;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
@@ -42,12 +43,14 @@ public class SignInController : ControllerBase
     }
 
     [HttpGet]
-    public async Task GoogleLogin()
+    public IActionResult GoogleLogin()
     {
-        await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, new AuthenticationProperties
+        var properties = new AuthenticationProperties
         {
-            RedirectUri = Url.Action("GoogleCallback", "SignIn")
-        });
+            RedirectUri = Url.Action("GoogleCallback")
+        };
+
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
 
     [HttpGet]
@@ -56,29 +59,47 @@ public class SignInController : ControllerBase
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         if (!result.Succeeded)
-        {
             return Unauthorized();
-        }
 
-        var claims = result.Principal.Claims.ToList();
-        var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-        var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        var email = result.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
-        var db = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
-        if (user == null)
+        // 👉 Сюда добавь сохранение в БД при необходимости
+
+        // Генерация JWT
+        var claims = new[]
         {
-            user = new IdentityUser
-            {
-                Email = email,
-                UserName = name
-            };
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
-        }
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, email),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, email)
+        };
 
-        var jwt = JwtHelper.GenerateJwtToken(user, _configuration);
+        var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes("super_secret_key_12345")
+        );
 
-        return Ok(new { token = jwt });
+        var creds = new Microsoft.IdentityModel.Tokens.SigningCredentials(
+            key, SecurityAlgorithms.HmacSha256
+        );
+
+        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(1),
+            signingCredentials: creds
+        );
+
+        var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(jwt);
+
+        // Отдаём HTML, который вернёт токен через window.opener
+        var html = $@"
+            <html>
+            <body>
+                <script>
+                    window.opener.postMessage({{ token: '{token}' }}, '*');
+                    window.close();
+                </script>
+            </body>
+            </html>
+        ";
+
+        return Content(html, "text/html");
     }
 }
