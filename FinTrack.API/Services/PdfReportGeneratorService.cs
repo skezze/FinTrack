@@ -1,63 +1,117 @@
-﻿using FinTrack.API.Entities;
+﻿using System.Text;
+using FinTrack.API.Entities;
 using iText.Kernel.Pdf;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using System.Globalization;
 using iText.Layout;
-using iText.IO.Font.Constants;
+using iText.IO.Font;
 using iText.Kernel.Font;
+using iText.Kernel.Colors;
+using iText.Layout.Borders;
 using FinTrack.API.Services.Interfaces;
 
 namespace FinTrack.API.Services
 {
     public class PdfReportGeneratorService : IPdfReportGeneratorService
     {
+        private const string FONT_PATH = @"C:\Windows\Fonts\times.ttf";
+
         public void GenerateFinancialReport(string filePath, List<MonobankTransaction> transactions, string accountId)
         {
-            using (var writer = new PdfWriter(filePath))
-            using (var pdf = new PdfDocument(writer))
-            using (var document = new Document(pdf))
+            if (transactions == null)
             {
-                var boldFont = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
-                var regularFont = PdfFontFactory.CreateFont(StandardFonts.TIMES_ROMAN);
+                Console.WriteLine("Ошибка: Список транзакций не может быть null.");
+                transactions = new List<MonobankTransaction>();
+            }
 
-                document.Add(new Paragraph("Financial Report")
-                    .SetFont(boldFont)
-                    .SetFontSize(18)
-                    .SetTextAlignment(TextAlignment.CENTER));
+            try
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-                document.Add(new Paragraph($"Account: {accountId}")
-                    .SetFont(regularFont)
-                    .SetFontSize(12)
-                    .SetMarginBottom(10));
+                PdfFont regularFont = PdfFontFactory.CreateFont(FONT_PATH, PdfEncodings.IDENTITY_H);
 
-                Table table = new Table(new float[] { 50, 120, 60, 60, 80, 80 }).UseAllAvailableWidth();
+                CultureInfo cultureInfo = new CultureInfo("uk-UA");
 
-                table.AddHeaderCell(new Cell().Add(new Paragraph("No.").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("Description").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("Amount").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("Balance").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("Date").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-                table.AddHeaderCell(new Cell().Add(new Paragraph("Comment").SetFont(boldFont).SetTextAlignment(TextAlignment.CENTER)));
-
-                int index = 1;
-                foreach (var transaction in transactions)
+                using (var writer = new PdfWriter(filePath))
+                using (var pdf = new PdfDocument(writer))
+                using (var document = new Document(pdf))
                 {
-                    table.AddCell(new Cell().Add(new Paragraph(index.ToString()).SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    table.AddCell(new Cell().Add(new Paragraph(transaction.Description ?? "-").SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    table.AddCell(new Cell().Add(new Paragraph((transaction.Amount / 100.0).ToString("F2", CultureInfo.InvariantCulture)).SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    table.AddCell(new Cell().Add(new Paragraph((transaction.Balance / 100.0).ToString("F2", CultureInfo.InvariantCulture)).SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    table.AddCell(new Cell().Add(new Paragraph(DateTimeOffset.FromUnixTimeSeconds(transaction.Time).ToString("dd.MM.yyyy HH:mm")).SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    table.AddCell(new Cell().Add(new Paragraph(transaction.Comment ?? "-").SetFont(regularFont).SetTextAlignment(TextAlignment.CENTER)));
-                    index++;
-                }
+                    document.Add(new Paragraph("Фінансовий звіт")
+                        .SetFont(regularFont)
+                        .SetFontSize(18)
+                        .SetTextAlignment(TextAlignment.CENTER)
+                        .SetMarginBottom(5));
 
-                document.Add(table);
-                document.Add(new Paragraph($"Report generated on: {DateTime.Now:dd.MM.yyyy HH:mm}")
-                    .SetFont(regularFont)
-                    .SetTextAlignment(TextAlignment.CENTER));
+                    document.Add(new Paragraph($"Рахунок: {accountId}")
+                        .SetFont(regularFont)
+                        .SetFontSize(12)
+                        .SetTextAlignment(TextAlignment.CENTER)
+                        .SetMarginBottom(15));
+
+                    Table table = new Table(UnitValue.CreatePercentArray(new float[] { 10, 30, 18, 18, 14, 10 })).UseAllAvailableWidth();
+
+                    table.AddHeaderCell(CreateHeaderCell("№", regularFont));
+                    table.AddHeaderCell(CreateHeaderCell("Опис", regularFont));
+                    table.AddHeaderCell(CreateHeaderCell("Сума", regularFont));
+                    table.AddHeaderCell(CreateHeaderCell("Баланс", regularFont));
+                    table.AddHeaderCell(CreateHeaderCell("Дата", regularFont));
+                    table.AddHeaderCell(CreateHeaderCell("Коментар", regularFont));
+
+                    int index = 1;
+                    foreach (var transaction in transactions)
+                    {
+                        DeviceRgb amountColor = transaction.Amount < 0 ? new DeviceRgb(200, 0, 0) : new DeviceRgb(0, 128, 0);
+
+                        string amountString = (transaction.Amount / 100.0).ToString("N2", cultureInfo) + " грн.";
+                        string balanceString = (transaction.Balance / 100.0).ToString("N2", cultureInfo) + " грн.";
+                        string dateString = DateTimeOffset.FromUnixTimeSeconds(transaction.Time).LocalDateTime.ToString("dd.MM.yyyy HH:mm");
+
+                        table.AddCell(CreateDataCell(index.ToString(), regularFont, TextAlignment.CENTER));
+                        table.AddCell(CreateDataCell(transaction.Description ?? "-", regularFont, TextAlignment.LEFT));
+                        table.AddCell(CreateDataCell(amountString, regularFont, TextAlignment.RIGHT).SetFontColor(amountColor));
+                        table.AddCell(CreateDataCell(balanceString, regularFont, TextAlignment.RIGHT));
+                        table.AddCell(CreateDataCell(dateString, regularFont, TextAlignment.CENTER));
+                        table.AddCell(CreateDataCell(transaction.Comment ?? "-", regularFont, TextAlignment.LEFT));
+
+                        index++;
+                    }
+
+                    document.Add(table);
+
+                    document.Add(new Paragraph($"Звіт згенеровано: {DateTime.Now:dd.MM.yyyy HH:mm}")
+                        .SetFont(regularFont)
+                        .SetFontSize(9)
+                        .SetTextAlignment(TextAlignment.CENTER)
+                        .SetMarginTop(20));
+
+                    Console.WriteLine($"PDF звіт успішно створено: {filePath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Сталася помилка при генерації PDF: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
             }
         }
-    }
 
+        private Cell CreateHeaderCell(string text, PdfFont font)
+        {
+            return new Cell()
+                .Add(new Paragraph(text).SetFont(font).SetFontSize(10))
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetPadding(4)
+                .SetBackgroundColor(new DeviceRgb(230, 230, 230))
+                .SetBorder(new SolidBorder(new DeviceRgb(150, 150, 150), 0.5f));
+        }
+
+        private Cell CreateDataCell(string text, PdfFont font, TextAlignment alignment = TextAlignment.LEFT)
+        {
+            return new Cell()
+                .Add(new Paragraph(text).SetFont(font).SetFontSize(9))
+                .SetTextAlignment(alignment)
+                .SetPadding(4)
+                .SetBorder(new SolidBorder(new DeviceRgb(200, 200, 200), 0.5f));
+        }
+    }
 }
