@@ -1,4 +1,5 @@
 ﻿using FinTrack.API;
+using FinTrack.API.BackgroundServices;
 using FinTrack.API.Services;
 using FinTrack.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -48,8 +49,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString!)
-    .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
+    options.UseNpgsql(connectionString!));
 
 builder.Services.AddCors(options =>
 {
@@ -90,6 +90,7 @@ builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 builder.Services.AddHttpClient<IMonobankService, MonobankService>();
 builder.Services.AddScoped<IPdfReportGeneratorService, PdfReportGeneratorService>();
 builder.Services.AddScoped<IBouncyCastleService, BouncyCastleService>();
+builder.Services.AddHostedService<UpdateTransactionsBackgroundService>();
 
 var app = builder.Build();
 

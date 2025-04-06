@@ -36,7 +36,7 @@ namespace FinTrack.API.Services
         /// <summary>
         /// Получение выписки по счету за промежуток времени не больше 30 дней и 500 транзакций
         /// </summary>
-        public async Task<List<MonobankTransaction>?> GetStatementAsync(long from, long to, string accountId = "0")//"0" is default account
+        public async Task RefreshTransactions(long from, long to, string accountId)//"0" is default account
         {
             var transactions = await SendRequestAsync<List<MonobankTransaction>>($"{BaseUrl}/statement/{accountId}/{from}/{to}");
 
@@ -44,8 +44,6 @@ namespace FinTrack.API.Services
             {
                 await AddTransactionIfNeeded(transactions!, accountId);
             }
-            
-            return transactions;
         }
 
         /// <summary>

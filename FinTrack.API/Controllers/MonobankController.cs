@@ -23,27 +23,15 @@ namespace FinTrack.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStatementForAMonthAsync()
-        {
-            var utcNow = DateTime.UtcNow;
-            var utcNowTimestamp = utcNow.ToTimestampLong();
-            var utc30DaysAgo = utcNow.AddDays(-30).ToTimestampLong();
-
-            var statement = await monobankService.GetStatementAsync(from: utc30DaysAgo, to: utcNowTimestamp, accountId: "0");
-            
-            return Ok(statement);
-        }
-
-        [HttpGet]
         public async Task<IActionResult> GetClientInfo()
         {
             return Ok(await monobankService.GetClientInfoAsync());
         }
 
         [HttpGet]
-        public IActionResult GetTransactionsAsync()
+        public async Task<IActionResult> GetTransactionsAsync(List<string> accountIds)
         {
-            return Ok(dbContext.MonobankTransactions);
+            return Ok(dbContext.MonobankTransactions.Where(i => accountIds.Contains(i.AccountId)));
         }
     }
 }
