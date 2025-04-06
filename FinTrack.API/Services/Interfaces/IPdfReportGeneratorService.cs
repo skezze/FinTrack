@@ -4,6 +4,6 @@ namespace FinTrack.API.Services.Interfaces
 {
     public interface IPdfReportGeneratorService
     {
-        void GenerateFinancialReport(string filePath, List<MonobankTransaction> transactions, string accountId);
+        Task<byte[]> GenerateReportBytesAsync(List<MonobankTransaction> transactions, string accountId, bool signDocument);
     }
 }

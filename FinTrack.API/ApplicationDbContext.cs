@@ -15,37 +15,33 @@ namespace FinTrack.API
         {
             base.OnModelCreating(builder);
 
-            var adminRoleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-            var adminRole = new IdentityRole
-            {
-                Id = adminRoleId.ToString(),
-                Name = "Admin",
-                NormalizedName = "ADMIN"
-            };
+            var passwordHasher = new PasswordHasher<IdentityUser>();
 
-            var adminUserId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             var adminUser = new IdentityUser
             {
-                Id = adminUserId.ToString(),
+                Id = "22222222-2222-2222-2222-222222222222",
                 UserName = "admin",
                 NormalizedUserName = "ADMIN",
                 Email = "admin@example.com",
                 NormalizedEmail = "ADMIN@EXAMPLE.COM",
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                PasswordHash = "AQAAAAIAAYagAAAAEJeySrostD/e3GSZc0ID0OaNXMTLh9RJTKTMbZal2Erq0K2r8xmn/TQ6JBR55apbew=="//Admin123!
             };
 
-            var passwordHasher = new PasswordHasher<IdentityUser>();
-            adminUser.PasswordHash = passwordHasher.HashPassword(adminUser, "Admin123!");
-
-            var adminUserRole = new IdentityUserRole<string>
+            builder.Entity<IdentityRole>().HasData(new IdentityRole
             {
-                UserId = adminUserId.ToString(),
-                RoleId = adminRoleId.ToString()
-            };
+                Id = "11111111-1111-1111-1111-111111111111",
+                Name = "Admin",
+                NormalizedName = "ADMIN"
+            });
 
-            builder.Entity<IdentityRole>().HasData(adminRole);
             builder.Entity<IdentityUser>().HasData(adminUser);
-            builder.Entity<IdentityUserRole<string>>().HasData(adminUserRole);
+
+            builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string>
+            {
+                UserId = "22222222-2222-2222-2222-222222222222",
+                RoleId = "11111111-1111-1111-1111-111111111111"
+            });
         }
 
     }

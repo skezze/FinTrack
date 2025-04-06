@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-[Authorize(Roles = "Admin")]
+
 public class UserController : ControllerBase 
 {
     private readonly UserManager<IdentityUser> userManager;
@@ -24,7 +24,7 @@ public class UserController : ControllerBase
         return Ok(await Task.FromResult(userManager.Users));
     }
 
-        [HttpPost]
+    [HttpPost]
     public async Task<IActionResult> AddUser([FromBody]RegisterModel registerModel)
     {
         var result = await userManager.CreateAsync(new IdentityUser(registerModel.Username), registerModel.Password);
@@ -84,6 +84,7 @@ public class UserController : ControllerBase
 
 
     [HttpDelete]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(string userName)
     {
         var user = await userManager.FindByNameAsync(userName);

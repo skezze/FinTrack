@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using FinTrack.API.Services.Interfaces;
+using FinTrack.API.Models;
 
 namespace FinTrack.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class BouncyCastleController : ControllerBase
     {
         private readonly IBouncyCastleService _bouncyCastleService;
@@ -22,8 +23,10 @@ namespace FinTrack.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult SignDocument([FromForm] IFormFile file)
+        [Consumes("multipart/form-data")]
+        public IActionResult SignDocument([FromForm] SignDocumentRequest request)
         {
+            var file = request.File;
             if (file == null || file.Length == 0)
                 return BadRequest("Invalid file.");
 
@@ -38,8 +41,12 @@ namespace FinTrack.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult VerifySignature([FromForm] IFormFile file, [FromForm] IFormFile signature)
+        [Consumes("multipart/form-data")]
+        public IActionResult VerifySignature([FromForm] VerifySignatureRequest request)
         {
+            var file = request.File;
+            var signature = request.Signature;
+
             if (file == null || signature == null || file.Length == 0 || signature.Length == 0)
                 return BadRequest("Invalid file or signature.");
 
