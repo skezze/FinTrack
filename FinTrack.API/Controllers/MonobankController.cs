@@ -7,7 +7,7 @@ namespace FinTrack.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    //[Authorize]
+    [Authorize]
     public class MonobankController: ControllerBase
     {
         private readonly IMonobankService monobankService;

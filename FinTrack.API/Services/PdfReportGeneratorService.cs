@@ -10,18 +10,13 @@ using iText.Kernel.Font;
 using iText.Kernel.Colors;
 using iText.Layout.Borders;
 using FinTrack.API.Services.Interfaces;
-using System.IO; // Для MemoryStream
-using System.Threading.Tasks; // Для Task
 
 namespace FinTrack.API.Services
 {
     public class PdfReportGeneratorService : IPdfReportGeneratorService
     {
-        // TODO: Сделать путь к шрифту конфигурируемым или встроить шрифт в проект
-        private const string FONT_PATH = @"C:\Windows\Fonts\times.ttf"; // Будьте осторожны с жестко заданными путями!
+        private const string FONT_PATH = @"C:\Windows\Fonts\times.ttf";
 
-
-        // --- НОВЫЙ МЕТОД: Генерирует PDF в память и возвращает byte[] ---
         public async Task<byte[]> GenerateReportBytesAsync(List<MonobankTransaction> transactions, string accountId, bool signDocument)
         {
             if (transactions == null)
@@ -30,7 +25,6 @@ namespace FinTrack.API.Services
                 transactions = new List<MonobankTransaction>();
             }
 
-            // Используем MemoryStream для записи PDF в память
             using (var memoryStream = new MemoryStream())
             {
                 try
@@ -40,13 +34,10 @@ namespace FinTrack.API.Services
 
                     CultureInfo cultureInfo = new CultureInfo("uk-UA");
 
-                    // Создаем PdfWriter для записи в MemoryStream
                     using (var writer = new PdfWriter(memoryStream))
-                    // Важно: не закрываем memoryStream здесь, iText сам управляет writer'ом
                     using (var pdf = new PdfDocument(writer))
                     using (var document = new Document(pdf))
                     {
-                        // --- Логика добавления контента в PDF (остается такой же) ---
                         document.Add(new Paragraph("Фінансовий звіт")
                             .SetFont(regularFont).SetFontSize(18).SetTextAlignment(TextAlignment.CENTER).SetMarginBottom(5));
                         document.Add(new Paragraph($"Рахунок: {accountId}")
@@ -78,52 +69,28 @@ namespace FinTrack.API.Services
                         }
                         document.Add(table);
 
-                        // --- TODO: ЛОГИКА ПОДПИСИ PDF (PAdES) ---
                         if (signDocument)
                         {
                             Console.WriteLine("Signing requested - Placeholder for PDF signing logic using iText7 and BouncyCastle.");
-                            // Здесь нужно будет:
-                            // 1. Загрузить приватный ключ (например, из файла или хранилища).
-                            // 2. Подготовить данные для подписи (хеш документа).
-                            // 3. Использовать возможности iText7 (возможно, PdfSigner) и BouncyCastle для создания
-                            //    и встраивания цифровой подписи (например, PAdES B-B или B-T) в PDF.
-                            //    Это более сложный процесс, чем просто генерация внешнего .sig файла.
-                            //    Потребуется работа с объектами PdfPKCS7, IExternalSignature, IExternalDigest и т.д.
-                            //    Пример ищите в документации iText 7 "digital signatures".
-                            //    ВАЖНО: Подпись обычно применяется ПОСЛЕ добавления всего контента,
-                            //    но ДО закрытия документа/потока, часто с использованием PdfStamper или PdfSigner.
-                            //    Возможно, структуру using придется немного изменить для подписи.
                         }
-                        // ---------------------------------------
 
                         document.Add(new Paragraph($"Звіт згенеровано: {DateTime.Now:dd.MM.yyyy HH:mm}")
                             .SetFont(regularFont).SetFontSize(9).SetTextAlignment(TextAlignment.CENTER).SetMarginTop(20));
-
-                        // Документ закроется автоматически при выходе из блока using
-                    } // Document, PdfDocument, PdfWriter закрываются здесь
+                    }
 
                     Console.WriteLine($"PDF звіт успішно згенеровано в пам'ять для рахунку {accountId}. Signed: {signDocument}");
 
-                    // Возвращаем содержимое MemoryStream как массив байт
-                    // Используем Task.FromResult, т.к. генерация iText синхронная
                     return await Task.FromResult(memoryStream.ToArray());
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Сталася помилка при генерації PDF в пам'ять: {ex.Message}");
                     Console.WriteLine(ex.StackTrace);
-                    // Пробрасываем исключение или возвращаем пустой массив/null
-                    // return Task.FromResult(Array.Empty<byte>());
-                    throw; // Лучше пробросить, чтобы контроллер вернул 500
+                    throw;
                 }
-            } // MemoryStream освобождается здесь
-              // Не нужно явно делать await Task.Run, т.к. iText синхронный,
-              // а контроллер уже будет вызван в потоке из пула ASP.NET Core.
-              // Просто возвращаем Task с результатом.
+            }
         }
 
-
-        // Вспомогательные методы остаются без изменений
         private Cell CreateHeaderCell(string text, PdfFont font)
         {
             return new Cell()
