@@ -2,9 +2,9 @@ name: Build & deploy .NET APP
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 env:
   cicdtest_image: '${{ secrets.DOCKER_HUB_USERNAME }}/fintrack-backend'
